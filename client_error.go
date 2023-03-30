@@ -1,6 +1,13 @@
 package ernie_api
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
+
+var (
+	ErrV3CustomizeRequest = errors.New("request params convert error")
+)
 
 type RequestError struct {
 	StatusCode int

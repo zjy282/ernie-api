@@ -2,7 +2,6 @@ package ernie_api
 
 import (
 	"context"
-	"errors"
 	"github.com/google/go-querystring/query"
 	"net/http"
 )
@@ -35,10 +34,6 @@ const (
 
 )
 
-var (
-	ErrV3CustomizeRequest = errors.New("request params convert error")
-)
-
 type V3CustomizeRequest struct {
 	Async             int     `json:"async" url:"async"`
 	Text              string  `json:"text" url:"text"`
@@ -66,7 +61,7 @@ type V3CustomizeResponse struct {
 	} `json:"data"`
 }
 
-func (c *Client) CreateV3Customize(ctx context.Context, request *V3CustomizeRequest) (response V3CustomizeResponse, err error) {
+func (c *Client) CreateV3Customize(ctx context.Context, request *V3CustomizeRequest) (response *V3CustomizeResponse, err error) {
 
 	urlSuffix := "/rest/1.0/ernie/3.0.28/zeus"
 
