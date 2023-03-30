@@ -31,20 +31,30 @@ response, err := CreateOAuthToken(ctx, req)
 
 ```go
 client := NewClient("")
-	ctx := context.Background()
-	req := &V3CustomizeRequest{
-		Async:            1,
-		Text:             "标题：芍药香氛的沐浴乳\\n文案：",
-		MinDecLen:        32,
-		SeqLen:           512,
-		TopP:             0.9,
-		TaskPrompt:       TaskPromptAdText,
-		PenaltyScore:     1.2,
-		IsUnidirectional: 0,
-		TypeId:           1,
+ctx := context.Background()
+req := &V3CustomizeRequest{
+    Async:            1,
+    Text:             "标题：芍药香氛的沐浴乳\\n文案：",
+    MinDecLen:        32,
+    SeqLen:           512,
+    TopP:             0.9,
+    TaskPrompt:       TaskPromptAdText,
+    PenaltyScore:     1.2,
+    IsUnidirectional: 0,
+    TypeId:           1,
+}
+
+response, err := client.CreateV3Customize(ctx, req)
+```
+
+3. 调用文心一言结果返回接口
+
+```go
+req := &ResultRequest{
+		TaskId: 1,
 	}
 
-	response, err := client.CreateV3Customize(ctx, req)
+	response, err := client.GetResult(ctx, req)
 ```
 
 ## 注意
