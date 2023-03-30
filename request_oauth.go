@@ -1,4 +1,4 @@
-package ernie_api
+package ernieapi
 
 import (
 	"context"
