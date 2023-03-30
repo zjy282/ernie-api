@@ -51,10 +51,10 @@ response, err := client.CreateV3Customize(ctx, req)
 
 ```go
 req := &ResultRequest{
-		TaskId: 1,
-	}
+    TaskId: 1,
+}
 
-	response, err := client.GetResult(ctx, req)
+response, err := client.GetResult(ctx, req)
 ```
 
 ## 注意
