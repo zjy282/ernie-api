@@ -53,12 +53,14 @@ type V3CustomizeRequest struct {
 }
 
 type V3CustomizeResponse struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-	Data struct {
-		TaskID    int    `json:"taskId"`
-		RequestID string `json:"requestId"`
-	} `json:"data"`
+	Code int             `json:"code"`
+	Msg  string          `json:"msg"`
+	Data V3CustomizeData `json:"data"`
+}
+
+type V3CustomizeData struct {
+	TaskID    int    `json:"taskId"`
+	RequestID string `json:"requestId"`
 }
 
 func (c *Client) CreateV3Customize(ctx context.Context, request *V3CustomizeRequest) (response *V3CustomizeResponse, err error) {

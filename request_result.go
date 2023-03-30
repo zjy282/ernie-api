@@ -11,16 +11,18 @@ type ResultRequest struct {
 }
 
 type ResultResponse struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-	Data struct {
-		Result     string `json:"result"`
-		CreateTime string `json:"createTime"`
-		RequestID  string `json:"requestId"`
-		Text       string `json:"text"`
-		TaskID     int    `json:"taskId"`
-		Status     int    `json:"status"`
-	} `json:"data"`
+	Code int        `json:"code"`
+	Msg  string     `json:"msg"`
+	Data ResultData `json:"data"`
+}
+
+type ResultData struct {
+	Result     string `json:"result"`
+	CreateTime string `json:"createTime"`
+	RequestID  string `json:"requestId"`
+	Text       string `json:"text"`
+	TaskID     int    `json:"taskId"`
+	Status     int    `json:"status"`
 }
 
 func (c *Client) GetResult(ctx context.Context, request *ResultRequest) (response *ResultResponse, err error) {
