@@ -3,11 +3,17 @@ package ernieapi
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
+)
+
+var (
+	ErrTxt2ImgStyleCheck      = errors.New("style not allow")
+	ErrTxt2ImgResolutionCheck = errors.New("resolution not allow")
 )
 
 const (
@@ -50,16 +56,49 @@ type Txt2ImgResponse struct {
 }
 
 type Txt2ImgData struct {
-	ASyncResponseCommon
+	TaskID    int    `json:"taskId"`
+	RequestID string `json:"requestId"`
 }
 
 func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (response *Txt2ImgResponse, err error) {
+	allowStyle := map[string]bool{
+		StyleAncient:       true,
+		StyleAnime:         true,
+		StyleRealism:       true,
+		StyleUkiyoE:        true,
+		StyleLowPoly:       true,
+		StyleFuturism:      true,
+		StylePixel:         true,
+		StyleConceptualArt: true,
+		StyleCyberpunk:     true,
+		StyleLolita:        true,
+		StyleBaroque:       true,
+		StyleSurrealism:    true,
+		StyleWatercolor:    true,
+		StyleSteamPunk:     true,
+		StyleOilPainting:   true,
+		StyleCartoon:       true,
+	}
+	if !allowStyle[request.Style] {
+		return response, ErrTxt2ImgStyleCheck
+	}
+
+	allowResolution := map[string]bool{
+		ResolutionSquareChart:     true,
+		ResolutionLongChart:       true,
+		ResolutionHorizontalChart: true,
+	}
+	if !allowResolution[request.Resolution] {
+		return response, ErrTxt2ImgResolutionCheck
+	}
 
 	urlSuffix := "/rest/1.0/ernievilg/v1/txt2img"
 
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
-	defer writer.Close()
+	defer func() {
+		_ = writer.Close()
+	}()
 	_ = writer.WriteField("text", request.Text)
 	_ = writer.WriteField("style", request.Style)
 	_ = writer.WriteField("resolution", request.Resolution)

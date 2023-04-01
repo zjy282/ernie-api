@@ -53,7 +53,9 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 		return err
 	}
 
-	defer res.Body.Close()
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
 		var errRes ResponseError
@@ -84,11 +86,6 @@ func (c *Client) fullURL(suffix string) string {
 var (
 	ErrV3CustomizeRequest = errors.New("request params convert error")
 )
-
-type ASyncResponseCommon struct {
-	TaskID    int    `json:"taskId"`
-	RequestID string `json:"requestId"`
-}
 
 type RequestError struct {
 	StatusCode int

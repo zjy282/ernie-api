@@ -2,9 +2,14 @@ package ernieapi
 
 import (
 	"context"
+	"errors"
 	"github.com/google/go-querystring/query"
 	"net/http"
 	"strings"
+)
+
+var (
+	ErrCustomizeTaskPromptCheck = errors.New("task prompt not allow")
 )
 
 const (
@@ -60,10 +65,41 @@ type V3CustomizeResponse struct {
 }
 
 type V3CustomizeData struct {
-	ASyncResponseCommon
+	TaskID    int    `json:"taskId"`
+	RequestID string `json:"requestId"`
 }
 
 func (c *Client) CreateV3Customize(ctx context.Context, request *V3CustomizeRequest) (response *V3CustomizeResponse, err error) {
+	allowTaskPrompt := map[string]bool{
+		TaskPromptParagraph:               true,
+		TaskPromptSend:                    true,
+		TaskPromptEntity:                  true,
+		TaskPromptSummarization:           true,
+		TaskPromptMT:                      true,
+		TaskPromptText2Annotation:         true,
+		TaskPromptCorrection:              true,
+		TaskPromptQAMRC:                   true,
+		TaskPromptDialogue:                true,
+		TaskPromptQAClosedBook:            true,
+		TaskPromptQAMultiChoice:           true,
+		TaskPromptQuestionGeneration:      true,
+		TaskPromptParaphrasing:            true,
+		TaskPromptNLI:                     true,
+		TaskPromptSemanticMatching:        true,
+		TaskPromptText2SQL:                true,
+		TaskPromptTextClassification:      true,
+		TaskPromptSentimentClassification: true,
+		TaskPromptZuoWen:                  true,
+		TaskPromptAdText:                  true,
+		TaskPromptCouplet:                 true,
+		TaskPromptNovel:                   true,
+		TaskPromptCloze:                   true,
+		TaskPromptMisc:                    true,
+	}
+
+	if !allowTaskPrompt[request.TaskPrompt] {
+		return response, ErrCustomizeTaskPromptCheck
+	}
 
 	urlSuffix := "/rest/1.0/ernie/3.0.28/zeus"
 
