@@ -3,17 +3,35 @@ package ernieapi
 import (
 	"context"
 	"fmt"
-	"os"
+	"mime/multipart"
+	"strings"
 	"testing"
 )
 
+const (
+	fileContents = "This is a test file."
+	boundary     = `MyBoundary`
+)
+const message = `
+--MyBoundary
+Content-Disposition: form-data; name="image"; filename="image.png"
+Content-Type: text/plain
+
+` + fileContents + `
+
+--MyBoundary--
+`
+
 func TestClient_CreateTxt2Img(t *testing.T) {
-	filePath := "./test.png"
-	file, err := os.Open(filePath)
+	b := strings.NewReader(strings.ReplaceAll(message, "\n", "\r\n"))
+	r := multipart.NewReader(b, boundary)
+	f, err := r.ReadForm(0)
 	if err != nil {
-		t.Error(err)
+		t.Fatal("ReadForm:", err)
 	}
-	defer file.Close()
+	defer func() {
+		_ = f.RemoveAll()
+	}()
 
 	client := NewClient("")
 	ctx := context.Background()
@@ -22,7 +40,7 @@ func TestClient_CreateTxt2Img(t *testing.T) {
 		Style:      StyleOilPainting,
 		Resolution: ResolutionSquareChart,
 		Num:        1,
-		Image:      file,
+		Image:      f.File["image"][0],
 	}
 
 	response, err := client.CreateTxt2Img(ctx, req)

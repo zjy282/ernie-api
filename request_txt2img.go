@@ -115,11 +115,11 @@ func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (re
 		var dst io.Writer
 		dst, err = writer.CreateFormFile("image", request.Image.Filename)
 		if err != nil {
-			return
+			return nil, err
 		}
 		_, err = io.Copy(dst, src)
 		if err != nil {
-			return
+			return nil, err
 		}
 		requestBody = body
 	} else {
