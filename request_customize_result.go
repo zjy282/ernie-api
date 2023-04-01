@@ -4,19 +4,20 @@ import (
 	"context"
 	"github.com/google/go-querystring/query"
 	"net/http"
+	"strings"
 )
 
-type ResultRequest struct {
+type V3CustomizeResultRequest struct {
 	TaskId int `json:"taskId" url:"taskId"`
 }
 
-type ResultResponse struct {
-	Code int        `json:"code"`
-	Msg  string     `json:"msg"`
-	Data ResultData `json:"data"`
+type V3CustomizeResultResponse struct {
+	Code int                   `json:"code"`
+	Msg  string                `json:"msg"`
+	Data V3CustomizeResultData `json:"data"`
 }
 
-type ResultData struct {
+type V3CustomizeResultData struct {
 	Result     string `json:"result"`
 	CreateTime string `json:"createTime"`
 	RequestID  string `json:"requestId"`
@@ -25,7 +26,7 @@ type ResultData struct {
 	Status     int    `json:"status"`
 }
 
-func (c *Client) GetResult(ctx context.Context, request *ResultRequest) (response *ResultResponse, err error) {
+func (c *Client) GetV3CustomizeResult(ctx context.Context, request *V3CustomizeResultRequest) (response *V3CustomizeResultResponse, err error) {
 
 	urlSuffix := "/rest/1.0/ernie/v1/getResult"
 
@@ -34,7 +35,7 @@ func (c *Client) GetResult(ctx context.Context, request *ResultRequest) (respons
 		return response, ErrV3CustomizeRequest
 	}
 
-	req, err := c.requestBuilder.build(ctx, http.MethodPost, c.fullURL(urlSuffix), requestParams)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.fullURL(urlSuffix), strings.NewReader(requestParams.Encode()))
 	if err != nil {
 		return
 	}

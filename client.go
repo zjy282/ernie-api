@@ -2,14 +2,31 @@ package ernieapi
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 )
 
+const (
+	apiURLv1 = "https://wenxin.baidu.com/moduleApi/portal/api"
+)
+
+type ClientConfig struct {
+	accessToken string
+	HTTPClient  *http.Client
+	BaseURL     string
+}
+
+func DefaultConfig(accessToken string) ClientConfig {
+	return ClientConfig{
+		HTTPClient:  &http.Client{},
+		BaseURL:     apiURLv1,
+		accessToken: accessToken,
+	}
+}
+
 type Client struct {
 	config ClientConfig
-
-	requestBuilder requestBuilder
 }
 
 func NewClient(accessToken string) *Client {
@@ -19,8 +36,7 @@ func NewClient(accessToken string) *Client {
 
 func NewClientWithConfig(config ClientConfig) *Client {
 	return &Client{
-		config:         config,
-		requestBuilder: newRequestBuilder(),
+		config: config,
 	}
 }
 
@@ -63,4 +79,38 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 
 func (c *Client) fullURL(suffix string) string {
 	return fmt.Sprintf("%s%s?access_token=%s", c.config.BaseURL, suffix, c.config.accessToken)
+}
+
+var (
+	ErrV3CustomizeRequest = errors.New("request params convert error")
+)
+
+type RequestError struct {
+	StatusCode int
+	Err        error
+}
+
+type ResponseError struct {
+	Msg  string `json:"msg"`
+	Code int    `json:"code"`
+	Err  error
+}
+
+func (e *ResponseError) Error() string {
+	return fmt.Sprintf("status code %d , message %s", e.Code, e.Msg)
+}
+
+func (e *ResponseError) Unwrap() error {
+	return e.Err
+}
+
+func (e *RequestError) Error() string {
+	if e.Err != nil {
+		return e.Err.Error()
+	}
+	return fmt.Sprintf("status code %d", e.StatusCode)
+}
+
+func (e *RequestError) Unwrap() error {
+	return e.Err
 }

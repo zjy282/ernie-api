@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestCreateV3Customize(t *testing.T) {
+func TestClient_CreateV3Customize(t *testing.T) {
 	client := NewClient("")
 	ctx := context.Background()
 	req := &V3CustomizeRequest{

@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-func TestGetResult(t *testing.T) {
+func TestClient_GetV3CustomizeResult(t *testing.T) {
 	client := NewClient("")
 	ctx := context.Background()
-	req := &ResultRequest{
+	req := &V3CustomizeResultRequest{
 		TaskId: 1,
 	}
 
-	response, err := client.GetResult(ctx, req)
+	response, err := client.GetV3CustomizeResult(ctx, req)
 	if err != nil {
 		t.Error(err)
 	}

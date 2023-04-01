@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/google/go-querystring/query"
 	"net/http"
+	"strings"
 )
 
 const (
@@ -35,21 +36,21 @@ const (
 )
 
 type V3CustomizeRequest struct {
-	Async             int     `json:"async" url:"async"`
-	Text              string  `json:"text" url:"text"`
-	MinDecLen         int     `json:"min_dec_len" url:"min_dec_len"`
-	SeqLen            int     `json:"seq_len" url:"seq_len"`
-	TopP              float32 `json:"topp" url:"topp"`
-	PenaltyScore      float32 `json:"penalty_score,omitempty" url:"penalty_score,omitempty"`
-	StopToken         string  `json:"stop_token,omitempty" url:"stop_token,omitempty"`
-	TaskPrompt        string  `json:"task_prompt,omitempty" url:"task_prompt,omitempty"`
-	TypeId            int     `json:"typeId" url:"typeId"`
-	PenaltyText       string  `json:"penalty_text,omitempty" url:"penalty_text,omitempty"`
-	ChoiceText        string  `json:"choice_text,omitempty" url:"choice_text,omitempty"`
-	IsUnidirectional  int     `json:"is_unidirectional,omitempty" url:"is_unidirectional,omitempty"`
-	MinDecPenaltyText string  `json:"min_dec_penalty_text,omitempty" url:"min_dec_penalty_text,omitempty"`
-	LogitsBias        float32 `json:"logits_bias,omitempty" url:"logits_bias,omitempty"`
-	MaskType          string  `json:"mask_type,omitempty" url:"mask_type,omitempty"`
+	Async             int     `json:"async"`
+	Text              string  `json:"text"`
+	MinDecLen         int     `json:"min_dec_len"`
+	SeqLen            int     `json:"seq_len"`
+	TopP              float32 `json:"topp"`
+	PenaltyScore      float32 `json:"penalty_score,omitempty"`
+	StopToken         string  `json:"stop_token,omitempty"`
+	TaskPrompt        string  `json:"task_prompt,omitempty"`
+	TypeId            int     `json:"typeId"`
+	PenaltyText       string  `json:"penalty_text,omitempty"`
+	ChoiceText        string  `json:"choice_text,omitempty"`
+	IsUnidirectional  int     `json:"is_unidirectional,omitempty"`
+	MinDecPenaltyText string  `json:"min_dec_penalty_text,omitempty"`
+	LogitsBias        float32 `json:"logits_bias,omitempty"`
+	MaskType          string  `json:"mask_type,omitempty"`
 }
 
 type V3CustomizeResponse struct {
@@ -72,11 +73,10 @@ func (c *Client) CreateV3Customize(ctx context.Context, request *V3CustomizeRequ
 		return response, ErrV3CustomizeRequest
 	}
 
-	req, err := c.requestBuilder.build(ctx, http.MethodPost, c.fullURL(urlSuffix), requestParams)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.fullURL(urlSuffix), strings.NewReader(requestParams.Encode()))
 	if err != nil {
 		return
 	}
-
 	err = c.sendRequest(req, &response)
 	return
 }
