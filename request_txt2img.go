@@ -9,7 +9,6 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
-	"os"
 	"strings"
 )
 
@@ -44,11 +43,11 @@ const (
 )
 
 type Txt2ImgRequest struct {
-	Text       string   `json:"text" url:"text"`
-	Style      string   `json:"style" url:"style"`
-	Resolution string   `json:"resolution" url:"resolution"`
-	Num        int      `json:"num" url:"num"`
-	Image      *os.File `json:"image,omitempty" url:"image,omitempty"`
+	Text       string                `json:"text" url:"text"`
+	Style      string                `json:"style" url:"style"`
+	Resolution string                `json:"resolution" url:"resolution"`
+	Num        int                   `json:"num" url:"num"`
+	Image      *multipart.FileHeader `json:"image,omitempty" url:"image,omitempty"`
 }
 
 type Txt2ImgResponse struct {
@@ -98,21 +97,27 @@ func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (re
 
 	var requestBody io.Reader
 	if request.Image != nil {
+		src, err := request.Image.Open()
+		if err != nil {
+			return nil, err
+		}
 		body := &bytes.Buffer{}
 		writer := multipart.NewWriter(body)
 		defer func() {
+			_ = src.Close()
 			_ = writer.Close()
 		}()
+
 		_ = writer.WriteField("text", request.Text)
 		_ = writer.WriteField("style", request.Style)
 		_ = writer.WriteField("resolution", request.Resolution)
 		_ = writer.WriteField("num", fmt.Sprintf("%d", request.Num))
 		var dst io.Writer
-		dst, err = writer.CreateFormFile("image", request.Image.Name())
+		dst, err = writer.CreateFormFile("image", request.Image.Filename)
 		if err != nil {
 			return
 		}
-		_, err = io.Copy(dst, request.Image)
+		_, err = io.Copy(dst, src)
 		if err != nil {
 			return
 		}
