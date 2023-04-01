@@ -85,6 +85,11 @@ var (
 	ErrV3CustomizeRequest = errors.New("request params convert error")
 )
 
+type ASyncResponseCommon struct {
+	TaskID    int    `json:"taskId"`
+	RequestID string `json:"requestId"`
+}
+
 type RequestError struct {
 	StatusCode int
 	Err        error

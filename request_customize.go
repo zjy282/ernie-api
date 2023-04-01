@@ -60,8 +60,7 @@ type V3CustomizeResponse struct {
 }
 
 type V3CustomizeData struct {
-	TaskID    int    `json:"taskId"`
-	RequestID string `json:"requestId"`
+	ASyncResponseCommon
 }
 
 func (c *Client) CreateV3Customize(ctx context.Context, request *V3CustomizeRequest) (response *V3CustomizeResponse, err error) {

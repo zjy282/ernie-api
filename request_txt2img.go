@@ -50,8 +50,7 @@ type Txt2ImgResponse struct {
 }
 
 type Txt2ImgData struct {
-	TaskID    int    `json:"taskId"`
-	RequestID string `json:"requestId"`
+	ASyncResponseCommon
 }
 
 func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (response *Txt2ImgResponse, err error) {
@@ -78,7 +77,6 @@ func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (re
 		}
 	}
 
-	fmt.Println(c.fullURL(urlSuffix))
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.fullURL(urlSuffix), body)
 	if err != nil {
 		return
