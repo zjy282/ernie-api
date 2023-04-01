@@ -5,10 +5,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/go-querystring/query"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
+	"strings"
 )
 
 var (
@@ -94,17 +96,17 @@ func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (re
 
 	urlSuffix := "/rest/1.0/ernievilg/v1/txt2img"
 
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	defer func() {
-		_ = writer.Close()
-	}()
-	_ = writer.WriteField("text", request.Text)
-	_ = writer.WriteField("style", request.Style)
-	_ = writer.WriteField("resolution", request.Resolution)
-	_ = writer.WriteField("num", fmt.Sprintf("%d", request.Num))
-
+	var requestBody io.Reader
 	if request.Image != nil {
+		body := &bytes.Buffer{}
+		writer := multipart.NewWriter(body)
+		defer func() {
+			_ = writer.Close()
+		}()
+		_ = writer.WriteField("text", request.Text)
+		_ = writer.WriteField("style", request.Style)
+		_ = writer.WriteField("resolution", request.Resolution)
+		_ = writer.WriteField("num", fmt.Sprintf("%d", request.Num))
 		var dst io.Writer
 		dst, err = writer.CreateFormFile("image", request.Image.Name())
 		if err != nil {
@@ -114,13 +116,22 @@ func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (re
 		if err != nil {
 			return
 		}
+		requestBody = body
+	} else {
+		requestParams, err := query.Values(*request)
+		if err != nil {
+			return response, ErrV3CustomizeRequest
+		}
+		requestBody = strings.NewReader(requestParams.Encode())
 	}
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.fullURL(urlSuffix), body)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.fullURL(urlSuffix), requestBody)
 	if err != nil {
 		return
 	}
-	req.Header.Set("Content-Type", "multipart/form-data")
+	if request.Image != nil {
+		req.Header.Set("Content-Type", "multipart/form-data")
+	}
 
 	err = c.sendRequest(req, &response)
 	return
