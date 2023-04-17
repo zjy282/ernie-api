@@ -31,7 +31,7 @@ func CreateOAuthToken(ctx context.Context, request *OAuthTokenRequest) (response
 	QueryParams.Add("grant_type", request.GrantType)
 	QueryParams.Add("client_id", request.ClientID)
 	QueryParams.Add("client_secret", request.ClientSecret)
-	requestUrl := client.fullURL(urlSuffix) + "?" + QueryParams.Encode()
+	requestUrl := client.config.BaseURL + urlSuffix + "?" + QueryParams.Encode()
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, requestUrl, nil)
 	if err != nil {
 		return
