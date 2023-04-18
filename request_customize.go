@@ -112,6 +112,7 @@ func (c *Client) CreateV3Customize(ctx context.Context, request *V3CustomizeRequ
 	if err != nil {
 		return
 	}
-	err = c.sendRequest(req, &response)
+	errResponse := &ResponseError{}
+	err = c.sendRequest(req, &response, errResponse)
 	return
 }

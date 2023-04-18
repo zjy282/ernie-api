@@ -12,9 +12,24 @@ func TestCreateOAuthToken(t *testing.T) {
 		ClientID:     "test",
 		ClientSecret: "test",
 	}
+
 	response, err := CreateOAuthToken(ctx, req)
 	if err != nil {
 		t.Error(err)
 	}
 	t.Log(fmt.Sprintf("response=%+v\n", response))
+}
+
+func TestCreateBCEOAuthToken(t *testing.T) {
+	ctx := context.Background()
+	req := &OAuthTokenRequest{
+		ClientID:     "test",
+		ClientSecret: "test",
+	}
+
+	responseBCE, err := CreateBCEOAuthToken(ctx, req)
+	if err != nil {
+		t.Error(err)
+	}
+	t.Log(fmt.Sprintf("response=%+v\n", responseBCE))
 }

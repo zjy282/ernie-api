@@ -138,6 +138,7 @@ func (c *Client) CreateTxt2Img(ctx context.Context, request *Txt2ImgRequest) (re
 		req.Header.Set("Content-Type", "multipart/form-data")
 	}
 
-	err = c.sendRequest(req, &response)
+	errResponse := &ResponseError{}
+	err = c.sendRequest(req, &response, errResponse)
 	return
 }

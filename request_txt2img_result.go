@@ -49,6 +49,7 @@ func (c *Client) GetTxt2ImgResult(ctx context.Context, request *Txt2ImgResultReq
 		return
 	}
 
-	err = c.sendRequest(req, &response)
+	errResponse := &ResponseError{}
+	err = c.sendRequest(req, &response, errResponse)
 	return
 }

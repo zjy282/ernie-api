@@ -8,13 +8,22 @@ import (
 )
 
 const (
-	apiURLv1 = "https://wenxin.baidu.com/moduleApi/portal/api"
+	apiURLv1    = "https://wenxin.baidu.com/moduleApi/portal/api"
+	apiURLv1BCE = "https://aip.baidubce.com"
+)
+
+type APIType string
+
+const (
+	APITypeWX  APIType = "wenxin"
+	APITypeBCE APIType = "bce"
 )
 
 type ClientConfig struct {
 	accessToken string
 	HTTPClient  *http.Client
 	BaseURL     string
+	APIType     APIType
 }
 
 func DefaultConfig(accessToken string) ClientConfig {
@@ -22,6 +31,16 @@ func DefaultConfig(accessToken string) ClientConfig {
 		HTTPClient:  &http.Client{},
 		BaseURL:     apiURLv1,
 		accessToken: accessToken,
+		APIType:     APITypeWX,
+	}
+}
+
+func DefaultBCEConfig(accessToken string) ClientConfig {
+	return ClientConfig{
+		HTTPClient:  &http.Client{},
+		BaseURL:     apiURLv1BCE,
+		accessToken: accessToken,
+		APIType:     APITypeBCE,
 	}
 }
 
@@ -40,7 +59,7 @@ func NewClientWithConfig(config ClientConfig) *Client {
 	}
 }
 
-func (c *Client) sendRequest(req *http.Request, v interface{}) error {
+func (c *Client) sendRequest(req *http.Request, successResponse, errResponse interface{}) error {
 	req.Header.Set("Accept", "application/json; charset=utf-8")
 
 	contentType := req.Header.Get("Content-Type")
@@ -58,20 +77,19 @@ func (c *Client) sendRequest(req *http.Request, v interface{}) error {
 	}()
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusBadRequest {
-		var errRes ResponseError
-		err = json.NewDecoder(res.Body).Decode(&errRes)
+		err = json.NewDecoder(res.Body).Decode(errResponse)
 		if err != nil {
 			reqErr := RequestError{
 				StatusCode: res.StatusCode,
 				Err:        err,
 			}
-			return fmt.Errorf("error, %w", &reqErr)
+			return fmt.Errorf("error, %+v", reqErr)
 		}
-		return fmt.Errorf("error, http code: %d, message: %w", res.StatusCode, &errRes)
+		return fmt.Errorf("error, http code: %d, message: %+v", res.StatusCode, errResponse)
 	}
 
-	if v != nil {
-		if err = json.NewDecoder(res.Body).Decode(v); err != nil {
+	if successResponse != nil {
+		if err = json.NewDecoder(res.Body).Decode(successResponse); err != nil {
 			return err
 		}
 	}
@@ -96,23 +114,4 @@ type ResponseError struct {
 	Msg  string `json:"msg"`
 	Code int    `json:"code"`
 	Err  error
-}
-
-func (e *ResponseError) Error() string {
-	return fmt.Sprintf("status code %d , message %s", e.Code, e.Msg)
-}
-
-func (e *ResponseError) Unwrap() error {
-	return e.Err
-}
-
-func (e *RequestError) Error() string {
-	if e.Err != nil {
-		return e.Err.Error()
-	}
-	return fmt.Sprintf("status code %d", e.StatusCode)
-}
-
-func (e *RequestError) Unwrap() error {
-	return e.Err
 }

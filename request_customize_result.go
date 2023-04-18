@@ -40,6 +40,7 @@ func (c *Client) GetV3CustomizeResult(ctx context.Context, request *V3CustomizeR
 		return
 	}
 
-	err = c.sendRequest(req, &response)
+	errResponse := &ResponseError{}
+	err = c.sendRequest(req, &response, errResponse)
 	return
 }
